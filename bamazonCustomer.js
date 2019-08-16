@@ -38,9 +38,45 @@ function displayItem(){
 
 }
 
-// function customerSearch(){
-//     inquirer.prompt({
-//         name:"action",
+function customerSearch(){
+    inquirer.prompt([
+        {
+            name:"Item",
+            type: "input",
+            message: "Enter the ID of the product you want to buy:",
+        },
+        {
+            name:"amount",
+            type: "input",
+            message: "Enter how many product you want to buy:",
+        }
+    ]).then(function(answer){
+        var query = "SELECT stock_quatity FROM products WHERE item_id = ? "
+        connection.query(query, [answer.Item], function(err, res) {
+            if (err) throw err;
+            console.log(res);
 
-//     })
-// }
+            var stockLevel = parseInt(res) - parseInt(answer.amount);
+            // var cost = parseInt(answer.amount)
+            // console.log(res[0]);
+            // console.log(answer.amount);
+            // console.log(stockLevel);
+            if (stockLevel < 0){
+                console.log("not enought inventory");
+            }
+            else{
+                updateStock(stockLevel,answer.Item);
+            }
+        });
+    });
+
+}
+
+function updateStock(stock,item){
+    var query = "UPDATE products set stock_quatity = stock where item_id = item;"
+    connection.query(query, function(err, res) {
+        if (err) throw err;
+        console.log(res);
+
+    })
+}
