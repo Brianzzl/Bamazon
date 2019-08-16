@@ -9,7 +9,7 @@ var connection = mysql.createConnection({
     user: "root",
 
     // Your password
-    password: "Myr00t",
+    password: "",
     database: "bamazon",
 
 });
@@ -18,7 +18,7 @@ var connection = mysql.createConnection({
 connection.connect(function(err){
     if(err) throw err;
     displayItem();
-    // customerSearch();
+
 })
 
 function displayItem(){
@@ -30,10 +30,11 @@ function displayItem(){
             res[i].product_name + " | " + 
             res[i].department_name + " | " + 
             "$: "+  res[i].price + " | " + 
-            "stock:" + res[i].stock_quantity
+            "stock:" + res[i].stock_quatity
             );
         }
         console.log("-----------------------------------");
+        customerSearch();
       });
 
 }
@@ -51,32 +52,37 @@ function customerSearch(){
             message: "Enter how many product you want to buy:",
         }
     ]).then(function(answer){
-        var query = "SELECT stock_quatity FROM products WHERE item_id = ? "
+        var query = "SELECT * FROM products WHERE item_id = ? "
         connection.query(query, [answer.Item], function(err, res) {
             if (err) throw err;
-            console.log(res);
+            // console.log(res);
 
-            var stockLevel = parseInt(res) - parseInt(answer.amount);
-            // var cost = parseInt(answer.amount)
-            // console.log(res[0]);
-            // console.log(answer.amount);
+            var stockLevel = parseInt(res[0].stock_quatity) - parseInt(answer.amount);
+            var cost = parseInt(answer.amount)*parseInt(res[0].price);
+            // console.log(res[0].stock_quatity);
             // console.log(stockLevel);
+            // console.log(cost);
+
             if (stockLevel < 0){
                 console.log("not enought inventory");
+
             }
             else{
-                updateStock(stockLevel,answer.Item);
+                updateStock(stockLevel,answer.Item,cost);
+
             }
         });
     });
 
 }
 
-function updateStock(stock,item){
-    var query = "UPDATE products set stock_quatity = stock where item_id = item;"
-    connection.query(query, function(err, res) {
+function updateStock(stock,item,cost){
+    var query = "UPDATE products set stock_quatity = ? where item_id = ?;"
+    connection.query(query, [stock,item],function(err, res) {
         if (err) throw err;
-        console.log(res);
+        // console.log(res);
+        console.log("Thanks for shopping with us, total cost:"+ cost+"$");
+
 
     })
 }
